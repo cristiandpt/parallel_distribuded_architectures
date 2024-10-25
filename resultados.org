@@ -1,0 +1,29 @@
+* Resultados secuencial:
++ 0m13.990s
++ 0m13.839s
++ 0m13.772s *
++ 0m18.638s *
++ 0m13.908s
+
+  Result: 13.912 
+
+** Resultados paralelo default:
++ 0m11.261s *
++ 0m11.033s
++ 0m10.650s * 
++ 0m11.062s
++ 0m10.850s
+
+  Result: 10.981
+  Speedup: 1.266
+  
+** Resultaos paralelo duplicado default:
++ 0m10.670 *
++ 0m12.082s
++ 0m11.054s
++ 0m12.252s
++ 0m12.252s *
+
+  Result:  11.796
+ SpeedUp: 1.179
+  
