@@ -1,3 +1,7 @@
+AUTOR : Cristian David Pacheco  Torres
+CODE: 227437
+DATE: <2024-10-24 Thu>
+
 * Resultados
 
 Luego de la ejecución de programa 5 veces en la respectiva configuración demandada en los puntos de parcial, se toma 3, eliminando los dos extremos y promediando los restandes, se tiene entonces lo siguente:
