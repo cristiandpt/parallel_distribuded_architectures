@@ -141,6 +141,9 @@ void aplicarFiltro(int *imagen, int *imagenProcesada, int width, int height) {
   int Gx[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
   int Gy[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
+  // Puesto que un for el cual tiene un complejidad muy alta (3 nidados) se opta
+  // por dividir cada uno en independiente y asi se baja exponente en la
+  // complejidad
 #pragma omp parallel for shared(imagen, Gx, Gy, width, height, imagenProcesada)
   for (int y = 1; y < height - 1; y++) {
     for (int x = 1; x < width - 1; x++) {
@@ -167,7 +170,8 @@ void aplicarFiltro(int *imagen, int *imagenProcesada, int width, int height) {
 int calcularSumaPixeles(int *imagen, int width, int height) {
   int suma = 0;
 
-// Usar una reducción para acumular la suma sin condiciones de carrera
+// Una reducción en paralelo para acumular la suma sin condiciones de carrera y
+// procesada individualamente
 #pragma omp parallel for reduction(+ : suma)
   for (int i = 0; i < width * height; i++) {
     suma += imagen[i];

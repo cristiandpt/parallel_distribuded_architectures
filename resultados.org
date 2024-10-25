@@ -1,16 +1,21 @@
-* Resultados secuencial:
+* Resultados
+
+Luego de la ejecución de programa 5 veces en la respectiva configuración demandada en los puntos de parcial, se toma 3, eliminando los dos extremos y promediando los restandes, se tiene entonces lo siguente:
+
+** Resultados secuencial
+
 + 0m13.990s
 + 0m13.839s
-+ 0m13.772s *
-+ 0m18.638s *
++ 0m13.772s (Eliminado)
++ 0m18.638s (Eliminado)
 + 0m13.908s
 
-  Result: 13.912 
+ Result: 13.912 
 
 ** Resultados paralelo default:
-+ 0m11.261s *
++ 0m11.261s (Eliminado)
 + 0m11.033s
-+ 0m10.650s * 
++ 0m10.650s (Eliminado)
 + 0m11.062s
 + 0m10.850s
 
@@ -18,12 +23,99 @@
   Speedup: 1.266
   
 ** Resultaos paralelo duplicado default:
-+ 0m10.670 *
++ 0m10.670  (Eliminado)
 + 0m12.082s
 + 0m11.054s
 + 0m12.252s
-+ 0m12.252s *
++ 0m12.252s (Eliminado)
 
-  Result:  11.796
- SpeedUp: 1.179
-  
+ Result:  11.796
+ Speedup: 1.179
+
+
+** Las características de máquina donde se ejecutaron las pruebas son las siguientes:
+
+#+begin_src
+  lscpu
+#+end_src
+
+#+BEGIN_QUOTE
+Architecture:            x86_64
+  CPU op-mode(s):        32-bit, 64-bit
+  Address sizes:         48 bits physical, 48 bits virtual
+  Byte Order:            Little Endian
+CPU(s):                  16
+  On-line CPU(s) list:   0-15
+Vendor ID:               AuthenticAMD
+  Model name:            AMD Ryzen 7 4800HS with Radeon Graphics
+    CPU family:          23
+    Model:               96
+    Thread(s) per core:  2
+    Core(s) per socket:  8
+    Socket(s):           1
+    Stepping:            1
+    Frequency boost:     enabled
+    CPU(s) scaling MHz:  48%
+    CPU max MHz:         4299.0229
+    CPU min MHz:         1400.0000
+    BogoMIPS:            5788.92
+    Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse
+                         36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rd
+                         tscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aper
+                         fmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe 
+                         popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_l
+                         egacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce top
+                         oext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_
+                         l3 hw_pstate ssbd mba ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep
+                          bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsave
+                         c xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local cl
+                         zero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_sav
+                         e tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthresh
+                         old avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov s
+                         uccor smca
+Virtualization features: 
+  Virtualization:        AMD-V
+Caches (sum of all):     
+  L1d:                   256 KiB (8 instances)
+  L1i:                   256 KiB (8 instances)
+  L2:                    4 MiB (8 instances)
+  L3:                    8 MiB (2 instances)
+NUMA:                    
+  NUMA node(s):          1
+  NUMA node0 CPU(s):     0-15
+Vulnerabilities:         
+  Itlb multihit:         Not affected
+  L1tf:                  Not affected
+  Mds:                   Not affected
+  Meltdown:              Not affected
+  Mmio stale data:       Not affected
+  Retbleed:              Mitigation; untrained return thunk; SMT enabled with STIBP protection
+  Spec store bypass:     Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+  Spectre v1:            Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+  Spectre v2:            Mitigation; Retpolines, IBPB conditional, STIBP always-on, RSB fillin
+                         g, PBRSB-eIBRS Not affected
+  Srbds:                 Not affected
+  Tsx async abort:       Not affected
+  #+END_QUOTE
+
+** Análisis del Speedup
+El speedup se calcula como la razón entre el tiempo de ejecución secuencial y el tiempo de ejecución paralelo. Un speedup de 1.266 en la configuración por defecto indica que la versión paralela es  más rápida o eficiente que la secuencial .
+
+*** Eficiencia del Speedup:
+
+Idealmente, el speedup debería ser proporcional al número de núcleos utilizados. En este caso, al tener una CPU de 16 núcleos, podríamos esperar un speedup cercano a 16 en el mejor de los casos.
+En la práctica, la superposición de la carga de trabajo, el acceso a memoria, la comunicacion, la coordinación entre hilos y la paralelización de ciertas secciones del código resultan en un speedup menor al esperado, lo cual se aprecia en los resultados obtenidos.
+*** Efectos de la Paralelización:
+
++ En la función aplicarFiltro, se utiliza la directiva #pragma omp parallel for para paralelizar el bucle que aplica el filtro a la imagen. Esto permite que cada hilo procese diferentes filas de la imagen simultáneamente, aprovechando múltiples núcleos.
++ En calcularSumaPixeles, la reducción se utiliza para acumular la suma sin condiciones de carrera, lo cual es crucial en operaciones paralelas donde múltiples hilos acceden a recursos compartidos.
+*** Desempeño con 32 Núcleos (Duplicado):
+
+En la configuración de 32 núcleos, el speedup es menor (1.179). Esto puede deberse a la sobrecarga de la gestión de más hilos (swithcontext) y a la disminución de la eficiencia del paralelismo en comparación con la carga de trabajo.
+
+En teoria, duplicar el número de hilos debería aumentar el rendimiento, pero el aumento en la concurrencia lleva a mayores colisiones en el acceso a la memoria y un mayor overhead en la gestión de los hilos (switch context).
+
+** Conclusión
+
+Los resultados muestran que la paralelización mejora el rendimiento del procesamiento de imágenes en comparación con el enfoque secuencial, aunque no alcanza la eficiencia ideal, pero en grandes cantidades de datos, cualquier ganancia en eficiencia representa na reduuccion de costo y dinero. La implementación de OpenMP permite una paralelización efectiva, pero se ve limitada por la carga de trabajo y la gestión de recursos. Esto se ve en el hecho en que fue mejor ejecutar el programa con el número por defecto de hilos, 16, que tener el doble de hilos, 32; de este modo, al tener un procesador dedicado para a una tarea y a un conjunto de datos determinados, es mas eficiente, que tener muchos pequeñas tareas en paralelo pero que padecen de concurrencia a los datos compartidos y al cambio de contexto y su lucha por el procesador de computador. La relación entre el speedup observado y las características de la máquina sugiere que, aunque hay beneficios al usar múltiples núcleos, la complejidad de las operaciones y la sobrecarga del sistema pueden limitar el rendimiento.
+
